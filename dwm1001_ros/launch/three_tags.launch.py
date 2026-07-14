@@ -13,7 +13,7 @@ def generate_launch_description():
     tag_launch = os.path.join(pkg, "launch", "tag_node.launch.py")
 
     common_args = {
-        "read_freq": "100",
+        "read_freq": "10",  # 10 seems to be the max
         "world_frame": "world",
         "publish_tfs": "true",
     }

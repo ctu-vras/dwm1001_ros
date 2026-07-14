@@ -32,6 +32,7 @@ class UWBTag(Node):
         time.sleep(0.5)
         if self.ser is not None:
             id = self.set_uwb_mode()
+            self.id = id
 
             prefix = "ID_" + id + "/"
 
@@ -179,6 +180,7 @@ class UWBTag(Node):
 
     def read_data(self):
         data = self.read_serial(False)  # list of bytes
+        # print(f"ID: {self.id} DATA: {data}")
         if data is None:
             self.reconnect()
         else:
@@ -189,18 +191,28 @@ class UWBTag(Node):
             no_warn = False
             for m in data:
                 m_str = m.decode("utf-8")
-                if len(m_str) >= 25 and m_str[4] == "[":
+                if m_str[0:4] == "POS[" or m_str == "leaps>" or m_str == "les":
+                    continue
+                elif len(m_str) >= 25 and m_str[4] == "[":
                     # distance from one of the anchors
-                    # e.q. 1151[5.00,8.00,2.25]=6.48
+                    # e.q. 1151[0.00,0.00,0.00,100]=6.48
                     a = Anchor()
                     a.id = m_str[0:4]  # 1151
 
-                    p = m_str[5:19].split(",")  # list, ['5.00', '8.00', '2.25']
-                    a.location.x = float(p[0])
-                    a.location.y = float(p[1])
-                    a.location.z = float(p[2])
+                    p = m_str[5:23].split(",")  # list, ['0.00', '0.00', '0.00', '100']
+                    if len(p)==3:
+                        p[2] = p[2][:-4]
+                        conf = 1.
+                    else:
+                        conf = float(p[4])/100
+                    
+                    if conf > 0:
+                        a.location.x = float(p[0])
+                        a.location.y = float(p[1])
+                        a.location.z = float(p[2])
 
-                    a.dist = float(m_str[21:])  # 6.48
+                    
+                    a.dist = float(m_str[m_str.find('=')+1:])  # 6.48
                     meas.measurements += [a]
                 elif m_str[0:5] == "le_us":
                     # computation time

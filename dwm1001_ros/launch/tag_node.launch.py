@@ -20,7 +20,7 @@ def generate_launch_description():
         [
             DeclareLaunchArgument("prefix", default_value=""),
             DeclareLaunchArgument("usb_port", default_value="/dev/ttyACM0"),
-            DeclareLaunchArgument("read_freq", default_value="100"),
+            DeclareLaunchArgument("read_freq", default_value="10"), # 10 seems to be the max; if you change this also change fs in @follow_me/follow_me/radio_locator.py
             DeclareLaunchArgument("world_frame", default_value="world"),
             DeclareLaunchArgument("publish_tfs", default_value="true"),
             # ROS 1 tag_node.launch passed "TODO" as the pose publisher tag_id
